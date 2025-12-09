@@ -1,0 +1,59 @@
+/* 진단 결과 섹션 스크롤바 커스터마이징 */
+.diagnosis-modal-details-left::-webkit-scrollbar {
+  width: 6px;
+}
+
+.diagnosis-modal-details-left::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.diagnosis-modal-details-left::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.diagnosis-modal-details-left::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1400px) {
+  .diagnosis-modal-visualization-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .diagnosis-modal-visualization-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .diagnosis-modal-details-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .diagnosis-modal-content {
+    max-height: 95vh !important;
+    margin: 10px !important;
+  }
+
+  .diagnosis-modal-body {
+    padding: 20px !important;
+  }
+
+  .diagnosis-modal-header {
+    padding: 16px 20px !important;
+  }
+
+  .diagnosis-modal-footer {
+    padding: 16px 20px !important;
+    flex-direction: column !important;
+  }
+
+  .diagnosis-modal-footer .btn {
+    width: 100% !important;
+  }
+}
