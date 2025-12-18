@@ -500,9 +500,17 @@ const DashboardPage = () => {
                 })}
         </nav>
       </Card>
-      <Card className="p-4 mt-6 flex flex-col overflow-hidden" style={{ height: bottomBoxHeight, minHeight: bottomBoxHeight }}>
-        <div className="text-slate-800 font-semibold mb-4">검토 상태별 현황</div>
-        <ReviewStatusSummary />
+      <Card className="p-4 mt-6 flex flex-col overflow-hidden" style={currentView === 'patients' ? { minHeight: '150px' } : { height: bottomBoxHeight, minHeight: bottomBoxHeight }}>
+        <div className="text-slate-800 dark:text-gray-200 font-semibold mb-4">
+          {currentView === 'patients' ? '추가 정보' : '진단 목록'}
+        </div>
+        {currentView === 'patients' ? (
+          <div className="text-sm text-slate-600 dark:text-gray-400 flex-1">
+            {/* 여기에 내용 추가 가능 */}
+          </div>
+        ) : (
+          <ReviewStatusSummary />
+        )}
       </Card>
     </aside>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { diagnosisAPI } from '../../utils/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 /**
  * 진단 분류 분포 도넛 차트 컴포넌트
@@ -10,6 +11,7 @@ const DiagnosisDonutChart = () => {
   const chartInstance = useRef(null);
   const [diagnosisData, setDiagnosisData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { darkMode } = useTheme();
 
   // 진단 이력 데이터 가져오기
   useEffect(() => {
@@ -184,7 +186,7 @@ const DiagnosisDonutChart = () => {
         itemHeight: 10,
         textStyle: {
           fontSize: 11,
-          color: '#333',
+          color: darkMode ? '#e5e7eb' : '#333',
           fontWeight: '500'
         },
         formatter: (name) => {
@@ -232,7 +234,7 @@ const DiagnosisDonutChart = () => {
             text: `총 ${total}건`,
             fontSize: 16,
             fontWeight: 'bold',
-            fill: '#333',
+            fill: darkMode ? '#e5e7eb' : '#333',
             textAlign: 'center',
             textVerticalAlign: 'middle'
           },
@@ -255,7 +257,7 @@ const DiagnosisDonutChart = () => {
         chartInstance.current.dispose();
       }
     };
-  }, [diagnosisData, loading]);
+  }, [diagnosisData, loading, darkMode]);
 
   if (loading) {
     return (

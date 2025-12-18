@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, Section, Badge } from './Cards';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const stateLabel = (state) => {
   if (state === 'urgent') return '주의';
@@ -18,6 +19,7 @@ const sortFavorites = (list) => {
 };
 
 const PatientSummary = ({ wards, favorites, onViewAll, onSelectPatient }) => {
+  const { darkMode } = useTheme();
   const wardStats = useMemo(() => ([
     { label: 'ICU', count: wards.icu || 0 },
     { label: '일반 병동', count: wards.ward || 0 }
@@ -110,9 +112,9 @@ const PatientSummary = ({ wards, favorites, onViewAll, onSelectPatient }) => {
                     <div className="mp-patient-sub">{p.room} • {p.lastImaging}</div>
                   </div>
                   <div className="mp-patient-state">
-                    {p.state === 'urgent' && <Badge color="red">{stateLabel(p.state)}</Badge>}
-                    {p.state === 'pending' && <Badge color="orange">{stateLabel(p.state)}</Badge>}
-                    {p.state === 'normal' && <Badge color="gray">{stateLabel(p.state)}</Badge>}
+                    {p.state === 'urgent' && <Badge key={darkMode} color="red">{stateLabel(p.state)}</Badge>}
+                    {p.state === 'pending' && <Badge key={darkMode} color="orange">{stateLabel(p.state)}</Badge>}
+                    {p.state === 'normal' && <Badge key={darkMode} color="gray">{stateLabel(p.state)}</Badge>}
                   </div>
                 </li>
               ))}

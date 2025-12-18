@@ -10,7 +10,7 @@
  */
 export function timeToPosition(time, hourHeight = 80) {
   const [hours, minutes] = time.split(':').map(Number);
-  const baseHour = 8; // 8am 시작
+  const baseHour = 0; // 0am 시작
   const hourOffset = hours - baseHour;
   const minuteOffset = minutes / 60;
   return (hourOffset + minuteOffset) * hourHeight;
@@ -44,13 +44,13 @@ export function formatDateKorean(date) {
 }
 
 /**
- * 시간이 업무 시간 내인지 확인 (08:00 - 18:00)
+ * 시간이 업무 시간 내인지 확인 (00:00 - 24:00, 항상 true)
  * @param {string} time - "HH:MM" 형식의 시간
  * @returns {boolean}
  */
 export function isBusinessHours(time) {
   const [hours] = time.split(':').map(Number);
-  return hours >= 8 && hours < 18;
+  return hours >= 0 && hours < 24;
 }
 
 /**
@@ -118,11 +118,11 @@ export function calculateScheduleHeight(startTime, endTime, hourHeight = 80) {
 
 /**
  * 15분 간격의 시간 옵션 생성
- * @param {number} startHour - 시작 시간 (기본값: 8)
- * @param {number} endHour - 종료 시간 (기본값: 18)
- * @returns {Array<string>} ["08:00", "08:15", ...] 형식의 배열
+ * @param {number} startHour - 시작 시간 (기본값: 0)
+ * @param {number} endHour - 종료 시간 (기본값: 24)
+ * @returns {Array<string>} ["00:00", "00:15", ...] 형식의 배열
  */
-export function generateTimeOptions(startHour = 8, endHour = 18) {
+export function generateTimeOptions(startHour = 0, endHour = 24) {
   const options = [];
   for (let hour = startHour; hour < endHour; hour++) {
     for (let minute = 0; minute < 60; minute += 15) {

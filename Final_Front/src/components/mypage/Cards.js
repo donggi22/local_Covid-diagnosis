@@ -34,13 +34,21 @@ export const Progress = ({ value = 0 }) => {
 
 export const Badge = ({ color = 'gray', children }) => {
   const colorMap = {
-    red: '#EF4444',
-    orange: '#F59E0B',
-    green: '#10B981',
-    gray: '#6B7280'
+    red: { light: '#EF4444', dark: '#F87171' },
+    orange: { light: '#F59E0B', dark: '#FBBF24' },
+    green: { light: '#10B981', dark: '#34D399' },
+    gray: { light: '#6B7280', dark: '#9CA3AF' }
   };
+  
+  const isDark = document.documentElement.classList.contains('dark');
+  const selectedColor = isDark ? colorMap[color].dark : colorMap[color].light;
+  
   return (
-    <span className="mp-badge" style={{ backgroundColor: `${colorMap[color]}22`, color: colorMap[color], borderColor: `${colorMap[color]}55` }}>
+    <span className="mp-badge" style={{ 
+      backgroundColor: `${selectedColor}22`, 
+      color: selectedColor, 
+      borderColor: `${selectedColor}55` 
+    }}>
       {children}
     </span>
   );

@@ -348,6 +348,62 @@
   .mp-col-span-2 { grid-column: auto; }
 }
 
+/* 다크모드 스타일 */
+.dark .mp-card {
+  background: #1f2937;
+  border-color: #374151;
+}
 
+.dark .mp-patient-name {
+  color: #e5e7eb;
+}
 
+.dark .mp-patient-sub {
+  color: #9ca3af;
+}
 
+.dark .mp-empty {
+  color: #9ca3af;
+}
+
+.dark .mp-btn-secondary {
+  background: #374151;
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+
+.dark .mp-btn-secondary:hover {
+  background: #4b5563;
+}
+
+.dark .mp-ward-count {
+  color: #e5e7eb;
+}
+
+.dark .mp-ward-label {
+  color: #9ca3af;
+}
+
+.dark .mp-fav-head h3 {
+  color: #e5e7eb;
+}
+
+.dark .mp-hint {
+  color: #9ca3af;
+}
+
+.dark .mp-bookmark {
+  color: #9ca3af;
+}
+
+.dark .mp-bookmark.on {
+  color: #fbbf24;
+}
+
+.dark .mp-patient-item {
+  border-color: #374151;
+}
+
+.dark .mp-patient-item:hover {
+  background: #374151;
+}

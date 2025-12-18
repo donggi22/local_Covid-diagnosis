@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
+from fastapi.responses import JSONResponse
 from bson import ObjectId
 from pathlib import Path
 import tempfile
 import os
+import json
 
 import app.db.mongo as mongo
 from app.models.ai import DiagnosisResponse, Finding
@@ -22,21 +24,14 @@ async def health_check(mongo_session=Depends(get_mongo_session)):
     return {'status': 'ok'}
 
 
-@router.post('/diagnose', response_model=DiagnosisResponse)
+@router.post('/diagnose')
 async def diagnose(
     image: UploadFile = File(...),
     patient_id: str = Form(default=''),
-    notes: str = Form(default=None),
-    mongo_session=Depends(get_mongo_session)
+    notes: str = Form(default=None)
 ):
-    # 환자 확인 (선택사항 - 없어도 이미지만으로 예측 가능)
+    # MongoDB 쿼리 제거 - 속도 최적화 (환자 정보는 Express에서 관리)
     patient = None
-    if patient_id and patient_id.strip():
-        try:
-            patient = await mongo_session.patients.find_one({'_id': ObjectId(patient_id)})
-        except Exception:
-            # patient_id가 잘못되었어도 이미지만 있으면 계속 진행
-            pass
 
     # 업로드된 파일을 임시로 저장
     temp_path = None
@@ -112,5 +107,28 @@ async def diagnose(
     )
     response_build_time = time.time() - response_build_start
     print(f'📦 응답 객체 생성 완료: {response_build_time:.4f}초')
-    print(f'🚀 FastAPI 응답 반환 시작...')
-    return response
+
+    # 일반 dict 반환 (FastAPI가 자동으로 JSONResponse로 변환)
+    serialization_start = time.time()
+    response_dict = {
+        'patient_id': response.patient_id,
+        'confidence': response.confidence,
+        'findings': [
+            {
+                'condition': f.condition,
+                'probability': f.probability,
+                'description': f.description
+            } for f in response.findings
+        ],
+        'recommendations': response.recommendations,
+        'ai_notes': response.ai_notes,
+        'gradcam_path': response.gradcam_path,
+        'gradcam_plus_path': response.gradcam_plus_path,
+        'layercam_path': response.layercam_path
+    }
+    serialization_time = time.time() - serialization_start
+    print(f'✅ 응답 dict 생성 완료: {serialization_time:.4f}초')
+    print(f'🚀 FastAPI 응답 반환 (dict)...')
+
+    # MongoDB Depends가 cleanup되기 전에 return
+    return response_dict

@@ -7,20 +7,20 @@ import CurrentTimeIndicator from './CurrentTimeIndicator';
  */
 const TimelineView = ({ schedules, onScheduleClick, onEmptySlotClick, hourHeight = 60 }) => {
   const timelineRef = useRef(null);
-  const totalHeight = 10 * hourHeight; // 8am-6pm = 10 hours
+  const totalHeight = 24 * hourHeight; // 0am-24pm = 24 hours
 
-  // 시간대 생성 (08:00 - 18:00)
-  const hours = Array.from({ length: 10 }, (_, i) => i + 8);
+  // 시간대 생성 (00:00 - 24:00)
+  const hours = Array.from({ length: 24 }, (_, i) => i);
 
   // 빈 슬롯 클릭 핸들러
   const handleTimelineClick = (e) => {
     if (e.target === timelineRef.current || e.target.classList.contains('hour-slot')) {
       const rect = timelineRef.current.getBoundingClientRect();
       const clickY = e.clientY - rect.top;
-      const clickedHour = Math.floor(clickY / hourHeight) + 8;
+      const clickedHour = Math.floor(clickY / hourHeight);
       const clickedMinute = Math.floor((clickY % hourHeight) / hourHeight * 60);
       const clickedTime = `${String(clickedHour).padStart(2, '0')}:${String(Math.floor(clickedMinute / 15) * 15).padStart(2, '0')}`;
-      
+
       onEmptySlotClick?.(clickedTime);
     }
   };
@@ -30,9 +30,9 @@ const TimelineView = ({ schedules, onScheduleClick, onEmptySlotClick, hourHeight
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
-    
-    if (hours >= 8 && hours < 18 && timelineRef.current) {
-      const currentPosition = ((hours - 8) * hourHeight) + (minutes / 60 * hourHeight);
+
+    if (timelineRef.current) {
+      const currentPosition = (hours * hourHeight) + (minutes / 60 * hourHeight);
       timelineRef.current.scrollTop = currentPosition - 200; // 약간 위로
     }
   }, [hourHeight]);

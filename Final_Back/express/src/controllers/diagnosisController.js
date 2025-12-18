@@ -10,18 +10,16 @@ const Patient = require('../models/Patient');
 // localhost 대신 127.0.0.1 사용 (Windows IPv6 DNS 지연 문제 해결)
 const FASTAPI_URL = process.env.FASTAPI_URL || 'http://127.0.0.1:8000';
 
-// HTTP Agent 설정: TCP 최적화
+// HTTP Agent 설정: keepAlive 비활성화로 즉시 연결 종료
 const httpAgent = new http.Agent({
-  keepAlive: false,
-  maxSockets: 1,
-  timeout: 60000,
-  // TCP_NODELAY: Nagle 알고리즘 비활성화로 지연 제거
-  scheduling: 'lifo'
+  keepAlive: false,       // 연결 즉시 종료 (응답 후 대기 시간 제거)
+  maxSockets: 10,         // 동시 연결 수
+  timeout: 60000          // 요청 타임아웃
 });
 
-// Socket 연결 시 TCP_NODELAY 설정
+// Socket 연결 시 TCP_NODELAY 설정 (Nagle 알고리즘 비활성화)
 httpAgent.on('socket', (socket) => {
-  socket.setNoDelay(true);
+  socket.setNoDelay(true);  // 작은 패킷도 즉시 전송
 });
 
 // 토큰에서 사용자 ID 추출 헬퍼 함수
@@ -168,11 +166,14 @@ exports.analyzeOnly = async (req, res) => {
         `${FASTAPI_URL}/api/ai/diagnose`,
         formData,
         {
-          timeout: 60000,
-          headers: formData.getHeaders(),
+          timeout: 60000,               // 60초 타임아웃
+          headers: {
+            ...formData.getHeaders(),
+            'Connection': 'close'
+          },
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
-          httpAgent: httpAgent,
+          // httpAgent 제거 - axios 기본값 사용
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
               const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -309,11 +310,14 @@ exports.createDiagnosis = async (req, res) => {
         `${FASTAPI_URL}/api/ai/diagnose`,
         formData,
         {
-          timeout: 60000,
-          headers: formData.getHeaders(),
+          timeout: 60000,               // 60초 타임아웃
+          headers: {
+            ...formData.getHeaders(),
+            'Connection': 'close'
+          },
           maxContentLength: Infinity,
           maxBodyLength: Infinity,
-          httpAgent: httpAgent,
+          // httpAgent 제거 - axios 기본값 사용
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
               const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
