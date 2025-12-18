@@ -98,7 +98,9 @@ async def diagnose(
         for item in inference_result['findings']
     ]
 
-    return DiagnosisResponse(
+    import time
+    response_build_start = time.time()
+    response = DiagnosisResponse(
             patient_id=patient_id or '',
         confidence=inference_result['confidence'],
         findings=findings,
@@ -108,3 +110,7 @@ async def diagnose(
         gradcam_plus_path=inference_result.get('gradcam_plus_path'),
         layercam_path=inference_result.get('layercam_path'),
     )
+    response_build_time = time.time() - response_build_start
+    print(f'📦 응답 객체 생성 완료: {response_build_time:.4f}초')
+    print(f'🚀 FastAPI 응답 반환 시작...')
+    return response

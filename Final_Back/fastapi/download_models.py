@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
 """GitHub Release에서 모델 파일을 다운로드하는 스크립트"""
 import os
+import sys
+
+# Windows 환경에서 UTF-8 출력 지원
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 import requests
 import zipfile
 import tempfile
@@ -8,9 +16,9 @@ from pathlib import Path
 from tqdm import tqdm
 
 # GitHub Release 정보
-GITHUB_REPO = "KimJoohyung4232/final-project"
-RELEASE_TAG = "rlawngud"  # 환경 변수로 오버라이드 가능
-MODEL_DIR = Path(__file__).parent.parent.parent / "AI_model" / "models"
+GITHUB_REPO = "donggi22/local_Covid-diagnosis"
+RELEASE_TAG = "v1.0.0"  # 환경 변수로 오버라이드 가능
+MODEL_DIR = Path(__file__).parent.parent.parent
 
 def download_file(url: str, dest_path: Path, chunk_size: int = 8192):
     """파일을 다운로드하고 진행률을 표시"""
@@ -97,15 +105,15 @@ def extract_zip(zip_path: Path, extract_to: Path):
         
         # 모델 파일을 올바른 위치로 복사
         if seg_model:
-            seg_dest = extract_to / "seg_results" / "best_model.pth"
+            seg_dest = extract_to / "seg_best_model.pth"
             seg_dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(seg_model, seg_dest)
             print(f"✅ 분할 모델 추출 완료: {seg_dest}")
         else:
             print("⚠️  분할 모델을 zip 파일에서 찾을 수 없습니다")
-        
+
         if clf_model:
-            clf_dest = extract_to / "clf_results" / "best_model.pth"
+            clf_dest = extract_to / "clf_best_model.pth"
             clf_dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(clf_model, clf_dest)
             print(f"✅ 분류 모델 추출 완료: {clf_dest}")
@@ -142,12 +150,12 @@ def download_models():
                 break
         
         # zip 파일이 있으면 zip 파일 처리
-        if zip_url:
+        if zip_url and zip_name:
             print(f"📦 zip 파일 발견: {zip_name}")
-            zip_path = MODEL_DIR.parent / zip_name
+            zip_path = MODEL_DIR / zip_name
             
-            if not (MODEL_DIR / "seg_results" / "best_model.pth").exists() or \
-               not (MODEL_DIR / "clf_results" / "best_model.pth").exists():
+            if not (MODEL_DIR / "seg_best_model.pth").exists() or \
+               not (MODEL_DIR / "clf_best_model.pth").exists():
                 print(f"📥 zip 파일 다운로드 중...")
                 download_file(zip_url, zip_path)
                 print(f"✅ zip 파일 다운로드 완료: {zip_path}")
@@ -172,7 +180,7 @@ def download_models():
                     clf_url = url
         
         if seg_url:
-            seg_path = MODEL_DIR / "seg_results" / "best_model.pth"
+            seg_path = MODEL_DIR / "seg_best_model.pth"
             if not seg_path.exists():
                 print(f"📥 분할 모델 다운로드 중...")
                 download_file(seg_url, seg_path)
@@ -184,7 +192,7 @@ def download_models():
             print(f"   사용 가능한 파일: {list(assets.keys())}")
         
         if clf_url:
-            clf_path = MODEL_DIR / "clf_results" / "best_model.pth"
+            clf_path = MODEL_DIR / "clf_best_model.pth"
             if not clf_path.exists():
                 print(f"📥 분류 모델 다운로드 중...")
                 download_file(clf_url, clf_path)
