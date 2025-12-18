@@ -19,9 +19,6 @@ Final_Back/express/src/uploads/
 # MongoDB data
 Final_Back/mongodb_data/
 
-# AI Model files (too large for GitHub)
-AI_model/
-
 # FastAPI static files (gradcam images)
 Final_Back/fastapi/app/static/
 
@@ -38,4 +35,8 @@ yarn-error.log*
 Final_Back/express/.env
 Final_Back/fastapi/.env
 
-NUL
+# model weights
+*.pth
+
+# Vscode
+*.vscode/

@@ -1,0 +1,564 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* 기본 스타일 */
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* 다크모드 전역 스타일 */
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* 모든 카드와 박스에 자동 다크모드 적용 */
+  .dark .bg-white:not(.no-dark) {
+    @apply bg-gray-800;
+  }
+
+  .dark .text-slate-900:not(.no-dark) {
+    @apply text-white;
+  }
+
+  .dark .text-slate-800:not(.no-dark) {
+    @apply text-gray-200;
+  }
+
+  .dark .text-slate-700:not(.no-dark) {
+    @apply text-gray-300;
+  }
+
+  .dark .text-slate-600:not(.no-dark) {
+    @apply text-gray-400;
+  }
+
+  .dark .text-gray-900:not(.no-dark) {
+    @apply text-white;
+  }
+
+  .dark .border-slate-200:not(.no-dark) {
+    @apply border-gray-700;
+  }
+
+  .dark .border-gray-200:not(.no-dark) {
+    @apply border-gray-700;
+  }
+
+  /* 커스텀 CSS 클래스들에 대한 다크모드 */
+  .dark .card,
+  .dark .profile-card,
+  .dark .patients-table,
+  .dark .diagnoses-table,
+  .dark .modal-content,
+  .dark .page-header {
+    background-color: #1f2937 !important;
+    color: #f3f4f6;
+  }
+
+  .dark .container,
+  .dark .mypage-container {
+    color: #f3f4f6;
+  }
+
+  .dark .filter-btn {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #d1d5db !important;
+  }
+
+  .dark .filter-btn:hover {
+    border-color: #6366f1 !important;
+    color: #818cf8 !important;
+  }
+
+  .dark .filter-btn.active {
+    background-color: #4f46e5 !important;
+    border-color: #4f46e5 !important;
+    color: white !important;
+  }
+
+  .dark .form-input,
+  .dark .form-textarea,
+  .dark input[type="text"],
+  .dark input[type="number"],
+  .dark input[type="password"],
+  .dark input[type="email"],
+  .dark select,
+  .dark textarea {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #f3f4f6 !important;
+  }
+
+  .dark .form-input::placeholder,
+  .dark .form-textarea::placeholder,
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #9ca3af !important;
+  }
+
+  .dark .table-header-row {
+    background-color: #111827 !important;
+  }
+
+  .dark .table-header-row th {
+    color: #d1d5db !important;
+  }
+
+  .dark .table-data-row {
+    border-bottom-color: #374151 !important;
+  }
+
+  .dark .table-data-row:hover {
+    background-color: #374151 !important;
+  }
+
+  .dark .table-data-row td {
+    color: #e5e7eb !important;
+  }
+
+  .dark .upload-area {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+  }
+
+  .dark .upload-area:hover {
+    background-color: #4b5563 !important;
+  }
+
+  .dark .upload-area p {
+    color: #d1d5db !important;
+  }
+
+  .dark .upload-hint {
+    color: #9ca3af !important;
+  }
+
+  .dark .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+  }
+
+  .dark .modal-header,
+  .dark .modal-body,
+  .dark .modal-footer {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+  }
+
+  .dark .modal-header h2 {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .form-label,
+  .dark label {
+    color: #d1d5db !important;
+  }
+
+  .dark .section {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+  }
+
+  .dark .section-header h2 {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .info-row .label {
+    color: #9ca3af !important;
+  }
+
+  .dark .info-row .value {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .loading-container {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+  }
+
+  .dark .loading-text {
+    color: #d1d5db !important;
+  }
+
+  .dark .empty-message {
+    color: #9ca3af !important;
+  }
+
+  .dark .pagination {
+    color: #d1d5db !important;
+  }
+
+  .dark .pagination-btn {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #d1d5db !important;
+  }
+
+  .dark .pagination-btn:hover:not(:disabled) {
+    background-color: #4b5563 !important;
+  }
+
+  .dark .pagination-btn:disabled {
+    background-color: #1f2937 !important;
+    color: #6b7280 !important;
+  }
+
+  .dark .pagination-number {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #d1d5db !important;
+  }
+
+  .dark .pagination-number:hover {
+    background-color: #4b5563 !important;
+  }
+
+  .dark .pagination-number.active {
+    background-color: #4f46e5 !important;
+    color: white !important;
+  }
+
+  .dark .avatar {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+  }
+
+  .dark .info .name {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .info .email {
+    color: #9ca3af !important;
+  }
+
+  /* 스크롤바 다크모드 */
+  .dark ::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+
+  /* 각 페이지별 컨테이너 다크모드 */
+  .dark .patient-management,
+  .dark .ai-diagnosis,
+  .dark .diagnosis-history,
+  .dark .mypage,
+  .dark .schedule-management-content,
+  .dark .patient-management-content,
+  .dark .ai-diagnosis-content,
+  .dark .diagnosis-history-content,
+  .dark .mypage-content {
+    background-color: #111827 !important;
+    color: #f3f4f6;
+  }
+
+  /* 버튼 다크모드 */
+  .dark .btn {
+    border-color: #4b5563 !important;
+  }
+
+  .dark .btn-primary {
+    background-color: #10b981 !important;
+    color: white !important;
+  }
+
+  .dark .btn-secondary {
+    background-color: #374151 !important;
+    color: #d1d5db !important;
+    border-color: #4b5563 !important;
+  }
+
+  .dark .btn-secondary:hover {
+    background-color: #4b5563 !important;
+  }
+
+  .dark .btn-danger {
+    background-color: #dc2626 !important;
+    color: white !important;
+  }
+
+  .dark .btn-edit {
+    background-color: transparent !important;
+    color: #10b981 !important;
+    border-color: #10b981 !important;
+  }
+
+  .dark .btn-edit:hover {
+    background-color: #10b981 !important;
+    color: white !important;
+  }
+
+  .dark .btn-diagnose {
+    background-color: #10b981 !important;
+    color: white !important;
+  }
+
+  .dark .btn-diagnose:hover {
+    background-color: #059669 !important;
+  }
+
+  .dark .btn-delete {
+    background-color: transparent !important;
+    border-color: #4b5563 !important;
+    color: #9ca3af !important;
+  }
+
+  .dark .btn-delete:hover {
+    background-color: #374151 !important;
+    border-color: #6b7280 !important;
+    color: #d1d5db !important;
+  }
+
+  /* 카드 내부 제목들 */
+  .dark .card h2,
+  .dark .card h3,
+  .dark .card h4,
+  .dark .section h2,
+  .dark .section h3,
+  .dark .section h4 {
+    color: #f3f4f6 !important;
+  }
+
+  /* 테이블 셀 색상 */
+  .dark .cell-name,
+  .dark .cell-age,
+  .dark .cell-gender,
+  .dark .cell-room,
+  .dark .cell-chart,
+  .dark .cell-date,
+  .dark .cell-result,
+  .dark .cell-image,
+  .dark .cell-doctor {
+    color: #e5e7eb !important;
+  }
+
+  .dark .cell-name strong {
+    color: #f3f4f6 !important;
+  }
+
+  /* 진단 결과 */
+  .dark .diagnosis-result {
+    color: #f3f4f6 !important;
+  }
+
+  /* 이미지 프리뷰 */
+  .dark .image-preview {
+    background-color: #374151 !important;
+  }
+
+  .dark .image-preview-content {
+    background-color: #374151 !important;
+  }
+
+  .dark .file-info {
+    background-color: #4b5563 !important;
+    color: #e5e7eb !important;
+  }
+
+  .dark .file-info p {
+    color: #d1d5db !important;
+  }
+
+  /* 상태 배지 */
+  .dark .status-badge,
+  .dark .confidence-badge {
+    opacity: 0.9;
+  }
+
+  /* MP 클래스들 (마이페이지) */
+  .dark .mp-card {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+
+  .dark .mp-card:hover {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+  }
+
+  .dark .mp-stat-label,
+  .dark .mp-ward-label,
+  .dark .mp-hint,
+  .dark .mp-patient-sub,
+  .dark .mp-gauge-label,
+  .dark .mp-kpi-label,
+  .dark .mp-chart-title,
+  .dark .mp-quick-sub,
+  .dark .mp-recent-date {
+    color: #9ca3af !important;
+  }
+
+  .dark .mp-stat-value,
+  .dark .mp-ward-count,
+  .dark .mp-patient-name,
+  .dark .mp-gauge-value,
+  .dark .mp-kpi-value,
+  .dark .mp-recent-name {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .mp-patient-item {
+    border-top-color: #374151 !important;
+  }
+
+  .dark .mp-bookmark {
+    background-color: transparent !important;
+    border-color: #4b5563 !important;
+    color: #9ca3af !important;
+  }
+
+  .dark .mp-recent-item {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #f3f4f6 !important;
+  }
+
+  .dark .mp-recent-item:hover {
+    border-color: #4b5563 !important;
+  }
+
+  .dark .mp-thumb {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+  }
+
+  .dark .mp-chip {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #d1d5db !important;
+  }
+
+  /* 일정 관리 */
+  .dark .timeline-container,
+  .dark .mini-calendar-wrapper,
+  .dark .upcoming-events-wrapper,
+  .dark .calendar-placeholder {
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+  }
+
+  .dark .calendar-placeholder p {
+    color: #9ca3af !important;
+  }
+
+  /* 진단 그리드 */
+  .dark .diagnosis-grid .card,
+  .dark .upload-card {
+    background-color: #1f2937 !important;
+  }
+
+  .dark .finding-item,
+  .dark .finding-item-detailed,
+  .dark .confidence-item {
+    background-color: #374151 !important;
+  }
+
+  .dark .finding-condition,
+  .dark .finding-label {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .finding-description,
+  .dark .finding-probability-text,
+  .dark .confidence-description {
+    color: #d1d5db !important;
+  }
+
+  /* 요약 카드 */
+  .dark .summary-card {
+    background-color: #1f2937 !important;
+  }
+
+  .dark .summary-content h3 {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .summary-content p {
+    color: #9ca3af !important;
+  }
+
+  /* 시각화 카드 */
+  .dark .visualization-card {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+
+  .dark .visualization-card h4 {
+    color: #f3f4f6 !important;
+  }
+
+  .dark .visualization-subtitle {
+    color: #9ca3af !important;
+  }
+
+  .dark .visualization-image-container {
+    background-color: #374151 !important;
+  }
+
+  .dark .visualization-placeholder {
+    color: #6b7280 !important;
+  }
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* 스크롤바 스타일링 (Webkit 브라우저) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

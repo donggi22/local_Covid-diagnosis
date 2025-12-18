@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 import numpy as np
 import os
 
@@ -16,7 +16,7 @@ from app.core.config import get_settings
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-AI_MODEL_DIR = BASE_DIR / 'AI_model'
+AI_MODEL_DIR = BASE_DIR
 
 # ==========================================
 # 모델 정의
@@ -149,6 +149,11 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 _segmentation_model: UNet | None = None
 _classification_model: COVID19Classifier | None = None
 
+# 성능 최적화를 위한 설정
+torch.set_num_threads(4)  # CPU 스레드 수 제한 (과도한 멀티스레딩 방지)
+if device.type == 'cpu':
+    torch.set_num_interop_threads(2)  # CPU 병렬 처리 최적화
+
 CLASS_NAMES = ['COVID', 'Lung_Opacity', 'Normal', 'Viral Pneumonia']
 
 # 분류 모델용 transform
@@ -180,8 +185,8 @@ def load_model() -> None:
         return
     
     # 모델 경로 설정
-    seg_model_path = AI_MODEL_DIR / 'models' / 'seg_results' / 'best_model.pth'
-    clf_model_path = AI_MODEL_DIR / 'models' / 'clf_results' / 'best_model.pth'
+    seg_model_path = AI_MODEL_DIR/'seg_best_model.pth'
+    clf_model_path = AI_MODEL_DIR/'clf_best_model.pth'
     
     # 모델 파일이 없으면 다운로드 시도 (Render 배포 환경)
     if not seg_model_path.exists() or not clf_model_path.exists():
@@ -197,6 +202,8 @@ def load_model() -> None:
                     [sys.executable, str(download_script_path)],
                     capture_output=True,
                     text=True,
+                    encoding='utf-8',
+                    errors='ignore',  # 디코딩 오류 무시
                     timeout=600  # 10분 타임아웃
                 )
                 if result.returncode == 0:
@@ -270,11 +277,11 @@ def _segment_lung(image_tensor: torch.Tensor, threshold: float = 0.5) -> torch.T
     """폐 영역을 분할한다."""
     if _segmentation_model is None:
         load_model()
-    
+
     assert _segmentation_model is not None
-    
+
     print(f'  🔬 분할 모델 입력 shape: {image_tensor.shape}, device: {image_tensor.device}')
-    with torch.no_grad():
+    with torch.inference_mode():  # no_grad()보다 빠름
         import time
         forward_start = time.time()
         mask_logits = _segmentation_model(image_tensor.to(device))
@@ -322,7 +329,7 @@ def _preprocess_for_classification(image_path: Path, mask: torch.Tensor) -> torc
     return tensor
 
 
-def _generate_gradcam(model: nn.Module, input_tensor: torch.Tensor, target_class: int, layer_name: str = 'layer4') -> np.ndarray:
+def _generate_gradcam(model: nn.Module, input_tensor: torch.Tensor, target_class: int, layer_name: str = 'layer4') -> np.ndarray | None:
     """Grad-CAM 히트맵을 생성한다."""
     model.eval()
     
@@ -382,11 +389,11 @@ def _generate_gradcam(model: nn.Module, input_tensor: torch.Tensor, target_class
         cam = F.relu(cam)
         
         # Normalize
-        cam = cam.squeeze().cpu().detach().numpy()
-        cam = cam - cam.min()
-        cam = cam / (cam.max() + 1e-8)
-        
-        return cam
+        cam_np: np.ndarray = cam.squeeze().cpu().detach().numpy()
+        cam_np = cam_np - cam_np.min()
+        cam_np = cam_np / (cam_np.max() + 1e-8)
+
+        return cam_np
         
     finally:
         # Hook 제거
@@ -395,7 +402,7 @@ def _generate_gradcam(model: nn.Module, input_tensor: torch.Tensor, target_class
         input_tensor.requires_grad_(False)
 
 
-def _generate_gradcam_plus(model: nn.Module, input_tensor: torch.Tensor, target_class: int, layer_name: str = 'layer4') -> np.ndarray:
+def _generate_gradcam_plus(model: nn.Module, input_tensor: torch.Tensor, target_class: int, layer_name: str = 'layer4') -> np.ndarray | None:
     """Grad-CAM++ 히트맵을 생성한다."""
     model.eval()
     
@@ -450,12 +457,12 @@ def _generate_gradcam_plus(model: nn.Module, input_tensor: torch.Tensor, target_
         # Weighted combination: sum over spatial dimensions
         cam = torch.sum(alpha * F.relu(grad) * act, dim=1, keepdim=True)
         cam = F.relu(cam)
-        
-        cam = cam.squeeze().cpu().detach().numpy()
-        cam = cam - cam.min()
-        cam = cam / (cam.max() + 1e-8)
-        
-        return cam
+
+        cam_np: np.ndarray = cam.squeeze().cpu().detach().numpy()
+        cam_np = cam_np - cam_np.min()
+        cam_np = cam_np / (cam_np.max() + 1e-8)
+
+        return cam_np
         
     finally:
         forward_handle.remove()
@@ -463,7 +470,7 @@ def _generate_gradcam_plus(model: nn.Module, input_tensor: torch.Tensor, target_
         input_tensor.requires_grad_(False)
 
 
-def _generate_layercam(model: nn.Module, input_tensor: torch.Tensor, target_class: int, layer_name: str = 'layer4') -> np.ndarray:
+def _generate_layercam(model: nn.Module, input_tensor: torch.Tensor, target_class: int, layer_name: str = 'layer4') -> np.ndarray | None:
     """Layer-CAM 히트맵을 생성한다."""
     model.eval()
     
@@ -594,10 +601,10 @@ def _save_gradcam_image(original_image: Image.Image, gradcam: np.ndarray, mask: 
     
     # Grad-CAM을 원본 이미지 크기로 리사이즈
     gradcam_resized = cv2.resize(gradcam, (img_array.shape[1], img_array.shape[0]))
-    gradcam_resized = np.uint8(255 * gradcam_resized)
-    
+    gradcam_uint8 = (255 * gradcam_resized).astype(np.uint8)
+
     # 히트맵 생성 (Jet colormap)
-    heatmap = cv2.applyColorMap(gradcam_resized, cv2.COLORMAP_JET)
+    heatmap = cv2.applyColorMap(gradcam_uint8, cv2.COLORMAP_JET)
     heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
     
     # 원본 이미지와 히트맵 오버레이 (0.4 투명도), 그레이 스케일 처리
@@ -622,42 +629,73 @@ def _save_gradcam_image(original_image: Image.Image, gradcam: np.ndarray, mask: 
     return output_path
 
 
-def predict(image_path: Path) -> Dict[str, object]:
+def predict(image_path: Path) -> Dict[str, Any]:
     """이미지를 예측한다 (분할 → 분류 파이프라인)."""
     import time
-    
+
+    total_start = time.time()
+
     if _segmentation_model is None or _classification_model is None:
         load_model()
-    
+
+    print(f'\n{"="*60}')
     print(f'🔍 이미지 예측 시작: {image_path}')
-    
+    print(f'   Device: {device}')
+    print(f'   CUDA available: {torch.cuda.is_available()}')
+    print(f'{"="*60}\n')
+
+    # CAM 생성 여부 (환경 변수로 제어, 기본값: True로 변경)
+    enable_cam = os.getenv('ENABLE_GRADCAM', 'true').lower() == 'true'
+    print(f'🎯 GradCAM 모드: {"활성화" if enable_cam else "비활성화"}\n')
+
     # 1. Segmentation용 이미지 전처리 (정규화 O)
     step_start = time.time()
+    print(f'[단계 1/5] Segmentation 전처리 시작...')
     image_tensor = _preprocess_image(image_path)
-    print(f'  ✓ Segmentation 전처리 완료: {time.time() - step_start:.2f}초')
-    
+    step_time = time.time() - step_start
+    print(f'  ✓ Segmentation 전처리 완료: {step_time:.4f}초')
+    print(f'     - Image tensor shape: {image_tensor.shape}\n')
+
     # 2. 폐 영역 분할
     step_start = time.time()
+    print(f'[단계 2/5] 폐 영역 분할 시작...')
     mask = _segment_lung(image_tensor)
-    print(f'  ✓ 폐 영역 분할 완료: {time.time() - step_start:.2f}초')
-    
-    # 3. 원본 이미지에 마스크 적용 후 분류용 전처리 (수정!)
+    step_time = time.time() - step_start
+    print(f'  ✓ 폐 영역 분할 완료: {step_time:.4f}초')
+    print(f'     - Mask shape: {mask.shape}\n')
+
+    # 3. 원본 이미지에 마스크 적용 후 분류용 전처리
     step_start = time.time()
-    segmented_tensor = _preprocess_for_classification(image_path, mask)  # image_path 전달!
-    print(f'  ✓ 분류 전처리 완료: {time.time() - step_start:.2f}초')
-    
+    print(f'[단계 3/5] 분류 전처리 시작...')
+    segmented_tensor = _preprocess_for_classification(image_path, mask)
+    step_time = time.time() - step_start
+    print(f'  ✓ 분류 전처리 완료: {step_time:.4f}초')
+    print(f'     - Segmented tensor shape: {segmented_tensor.shape}\n')
+
     # 4. 분류 예측
     step_start = time.time()
-    segmented_tensor_grad = segmented_tensor.clone().to(device)
-    segmented_tensor_grad.requires_grad_(True)
-    
-    with torch.no_grad():
-        outputs = _classification_model(segmented_tensor.to(device))
+    print(f'[단계 4/5] 분류 예측 시작...')
+    segmented_tensor = segmented_tensor.to(device)
+
+    assert _classification_model is not None
+
+    # CAM이 필요한 경우에만 requires_grad 활성화
+    if enable_cam:
+        print(f'     - 모드: GradCAM 활성화 (requires_grad=True)')
+        segmented_tensor.requires_grad_(True)
+        outputs = _classification_model(segmented_tensor)
         probabilities = torch.softmax(outputs, dim=1).squeeze(0)
-    
-    print(f'  ✓ 분류 예측 완료: {time.time() - step_start:.2f}초')
-    
-    probs = probabilities.cpu().numpy()
+    else:
+        print(f'     - 모드: 고속 추론 (inference_mode)')
+        with torch.inference_mode():  # 더 빠른 추론
+            outputs = _classification_model(segmented_tensor)
+            probabilities = torch.softmax(outputs, dim=1).squeeze(0)
+
+    step_time = time.time() - step_start
+    print(f'  ✓ 분류 예측 완료: {step_time:.4f}초')
+    print(f'     - Output shape: {outputs.shape}\n')
+
+    probs = probabilities.detach().cpu().numpy()
     top_indices = probs.argsort()[::-1][:3]
     
     findings = []
@@ -672,79 +710,76 @@ def predict(image_path: Path) -> Dict[str, object]:
     predicted_class = CLASS_NAMES[top_indices[0]]
     predicted_class_idx = top_indices[0]
     
-    # 5. GradCAM 생성 (수정!)
+    # 5. GradCAM 생성 (선택적 - ENABLE_GRADCAM 환경변수로 제어)
     gradcam_relative_path = None
     gradcam_plus_relative_path = None
     layercam_relative_path = None
-    
-    try:
-        print(f'  🎨 CAM 생성 시작...')
-        cam_start = time.time()
-        
-        # 역정규화된 이미지 준비 (GradCAM이 본 것과 동일한 이미지)
-        # segmented_tensor를 역정규화
-        # mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
-        # std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
-        # denorm_tensor = segmented_tensor.squeeze(0).cpu() * std + mean
-        # denorm_tensor = torch.clamp(denorm_tensor, 0, 1)
-        original_image = Image.open(image_path).convert('RGB')
-        
-        gradcam_base = os.getenv('GRADCAM_STORAGE_PATH', str(BASE_DIR / 'Final_Back' / 'fastapi' / 'app' / 'static'))
-        static_dir = Path(gradcam_base)
-        gradcam_dir = static_dir / 'gradcam'
-        gradcam_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Grad-CAM 생성
-        print(f'    📊 Grad-CAM 생성 중...')
-        gradcam = _generate_gradcam(
-            _classification_model,
-            segmented_tensor_grad,
-            target_class=predicted_class_idx,
-            layer_name='layer4'
-        )
-        if gradcam is not None:
-            gradcam_filename = f"gradcam_{image_path.stem}_{predicted_class_idx}.png"
-            gradcam_path = gradcam_dir / gradcam_filename
-            _save_gradcam_image(original_image, gradcam, mask, gradcam_path)
-            gradcam_relative_path = f"/static/gradcam/{gradcam_filename}"
-            print(f'    ✓ Grad-CAM 생성 완료')
-        
-        # Grad-CAM++ 생성
-        print(f'    📊 Grad-CAM++ 생성 중...')
-        gradcam_plus = _generate_gradcam_plus(
-            _classification_model,
-            segmented_tensor_grad,
-            target_class=predicted_class_idx,
-            layer_name='layer4'
-        )
-        if gradcam_plus is not None:
-            gradcam_plus_filename = f"gradcam_plus_{image_path.stem}_{predicted_class_idx}.png"
-            gradcam_plus_path = gradcam_dir / gradcam_plus_filename
-            _save_gradcam_image(original_image, gradcam_plus, mask, gradcam_plus_path)
-            gradcam_plus_relative_path = f"/static/gradcam/{gradcam_plus_filename}"
-            print(f'    ✓ Grad-CAM++ 생성 완료')
-        
-        # Layer-CAM 생성
-        print(f'    📊 Layer-CAM 생성 중...')
-        layercam = _generate_layercam(
-            _classification_model,
-            segmented_tensor_grad,
-            target_class=predicted_class_idx,
-            layer_name='layer4'
-        )
-        if layercam is not None:
-            layercam_filename = f"layercam_{image_path.stem}_{predicted_class_idx}.png"
-            layercam_path = gradcam_dir / layercam_filename
-            _save_gradcam_image(original_image, layercam, mask, layercam_path)
-            layercam_relative_path = f"/static/gradcam/{layercam_filename}"
-            print(f'    ✓ Layer-CAM 생성 완료')
-        
-        print(f'  ✓ 모든 CAM 생성 완료: {time.time() - cam_start:.2f}초')
-        
-    except Exception as e:
-        print(f'  ⚠️ CAM 생성 중 오류 발생: {str(e)}')
-        import traceback
-        traceback.print_exc()
+
+    print(f'[단계 5/5] GradCAM 생성...')
+    if enable_cam:
+        try:
+            cam_start = time.time()
+            print(f'     - GradCAM 활성화, 생성 시작...')
+
+            original_image = Image.open(image_path).convert('RGB')
+
+            gradcam_base = os.getenv('GRADCAM_STORAGE_PATH', str(BASE_DIR / 'Final_Back' / 'fastapi' / 'app' / 'static'))
+            static_dir = Path(gradcam_base)
+            gradcam_dir = static_dir / 'gradcam'
+            gradcam_dir.mkdir(parents=True, exist_ok=True)
+
+            # Grad-CAM 생성
+            gradcam = _generate_gradcam(
+                _classification_model,
+                segmented_tensor,
+                target_class=predicted_class_idx,
+                layer_name='layer4'
+            )
+            if gradcam is not None:
+                gradcam_filename = f"gradcam_{image_path.stem}_{predicted_class_idx}.png"
+                gradcam_path = gradcam_dir / gradcam_filename
+                _save_gradcam_image(original_image, gradcam, mask, gradcam_path)
+                gradcam_relative_path = f"/static/gradcam/{gradcam_filename}"
+                print(f'     ✓ Grad-CAM 저장: {gradcam_filename}')
+
+            # Grad-CAM++ 생성
+            gradcam_plus = _generate_gradcam_plus(
+                _classification_model,
+                segmented_tensor,
+                target_class=predicted_class_idx,
+                layer_name='layer4'
+            )
+            if gradcam_plus is not None:
+                gradcam_plus_filename = f"gradcam_plus_{image_path.stem}_{predicted_class_idx}.png"
+                gradcam_plus_path = gradcam_dir / gradcam_plus_filename
+                _save_gradcam_image(original_image, gradcam_plus, mask, gradcam_plus_path)
+                gradcam_plus_relative_path = f"/static/gradcam/{gradcam_plus_filename}"
+                print(f'     ✓ Grad-CAM++ 저장: {gradcam_plus_filename}')
+
+            # Layer-CAM 생성
+            layercam = _generate_layercam(
+                _classification_model,
+                segmented_tensor,
+                target_class=predicted_class_idx,
+                layer_name='layer4'
+            )
+            if layercam is not None:
+                layercam_filename = f"layercam_{image_path.stem}_{predicted_class_idx}.png"
+                layercam_path = gradcam_dir / layercam_filename
+                _save_gradcam_image(original_image, layercam, mask, layercam_path)
+                layercam_relative_path = f"/static/gradcam/{layercam_filename}"
+                print(f'     ✓ Layer-CAM 저장: {layercam_filename}')
+
+            cam_time = time.time() - cam_start
+            print(f'  ✓ 모든 CAM 생성 완료: {cam_time:.4f}초\n')
+
+        except Exception as e:
+            print(f'  ⚠️ CAM 생성 중 오류 발생: {str(e)}')
+            import traceback
+            traceback.print_exc()
+    else:
+        print(f'     - GradCAM 비활성화 (환경변수 ENABLE_GRADCAM=false)')
+        print(f'  ✓ GradCAM 건너뜀: 0.0000초\n')
     
     recommendations = []
     if confidence > 0.7:
@@ -776,5 +811,12 @@ def predict(image_path: Path) -> Dict[str, object]:
     
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
-        
+
+    total_time = time.time() - total_start
+    print(f'\n{"="*60}')
+    print(f'✅ 전체 예측 완료!')
+    print(f'   총 소요 시간: {total_time:.4f}초 ({total_time:.2f}초)')
+    print(f'   예측 결과: {predicted_class} (신뢰도: {confidence:.2%})')
+    print(f'{"="*60}\n')
+
     return result
