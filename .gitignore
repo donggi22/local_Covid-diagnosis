@@ -20,7 +20,7 @@ Final_Back/express/src/uploads/
 Final_Back/mongodb_data/
 
 # AI Model files (too large for GitHub)
-AI_model/
+*.pth
 
 # FastAPI static files (gradcam images)
 Final_Back/fastapi/app/static/
@@ -39,3 +39,6 @@ Final_Back/express/.env
 Final_Back/fastapi/.env
 
 NUL
+
+# Vscode
+.vscode/
