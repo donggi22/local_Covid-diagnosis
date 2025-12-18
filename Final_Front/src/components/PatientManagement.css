@@ -1,0 +1,831 @@
+.patient-management {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.patient-management-content {
+  padding: 0;
+  background-color: transparent;
+}
+
+.patient-management-content .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Embed 모드 스타일 (대시보드 카드 내부) */
+.patient-management.embedded {
+  min-height: auto;
+  background-color: transparent;
+  height: 100%;
+}
+
+.patient-management.embedded .embedded-main {
+  padding-bottom: 0;
+  height: 100%;
+  overflow: visible;
+}
+
+.patient-management.embedded .embedded-container {
+  max-width: 100%;
+  padding: 0;
+  height: 100%;
+}
+
+.page-header {
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px 0;
+  margin-bottom: 32px;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-header h1 {
+  color: #1f2937;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.page-main {
+  padding-bottom: 40px;
+}
+
+/* 필터 및 검색 섹션 - 진단 이력 페이지와 동일 */
+.filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.search-box {
+  flex: 1;
+  max-width: 400px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* 기존 management-tools 호환성 유지 */
+.management-tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.search-section {
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-section .form-input {
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 15px;
+}
+
+.patients-table {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+  margin: 24px 0;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+/* Embed 모드에서 테이블 스크롤 최적화 */
+.patient-management.embedded .patients-table {
+  margin: 0;
+  margin-top: 24px;
+}
+
+/* 헤더 행 */
+.table-header-row {
+  background: transparent;
+}
+
+.table-header-row th {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  padding: 16px 20px;
+  text-align: center;
+  vertical-align: middle;
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table-header-row th:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.table-header-row th:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.table-header-row th:first-child {
+  text-align: center !important;
+}
+
+.table-header-row th:last-child {
+  text-align: center !important;
+}
+
+/* 데이터 행 */
+.table-data-row {
+  background: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.table-data-row:hover {
+  background: #f8f9fa;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.table-data-row td {
+  padding: 16px 20px;
+  vertical-align: middle;
+  text-align: center;
+  background: white;
+}
+
+.table-data-row:hover td {
+  background: #f8f9fa;
+}
+
+.table-data-row td:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.table-data-row td:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* 이름 컬럼 */
+.cell-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #212529;
+  text-align: center !important;
+  min-width: 120px;
+  width: 120px;
+}
+
+/* 나이 컬럼 */
+.cell-age {
+  font-size: 14px;
+  color: #495057;
+  text-align: center;
+  min-width: 80px;
+  width: 80px;
+}
+
+/* 성별 컬럼 */
+.cell-gender {
+  font-size: 14px;
+  color: #495057;
+  text-align: center;
+  min-width: 80px;
+  width: 80px;
+}
+
+/* 병실 컬럼 */
+.cell-room {
+  font-size: 14px;
+  color: #495057;
+  text-align: center;
+  min-width: 100px;
+  width: 100px;
+}
+
+/* 차트번호 컬럼 */
+.cell-chart {
+  font-size: 14px;
+  color: #495057;
+  text-align: center;
+  min-width: 120px;
+  width: 120px;
+}
+
+/* 등록일 컬럼 */
+.cell-date {
+  font-size: 14px;
+  color: #495057;
+  text-align: center;
+  min-width: 130px;
+  width: 130px;
+}
+
+/* 상태 컬럼 */
+.cell-status {
+  text-align: center;
+  min-width: 110px;
+  width: 110px;
+}
+
+/* 액션 컬럼 */
+.cell-actions {
+  text-align: center;
+  min-width: 220px;
+  width: auto;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-urgent {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-new {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+/* 액션 컬럼 */
+.cell-actions {
+  text-align: center;
+  min-width: 200px;
+}
+
+.cell-actions button {
+  margin: 0 6px;
+  white-space: nowrap;
+}
+
+/* 진단하기 버튼 */
+.btn-diagnose {
+  background: #10b981;
+  color: white;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-diagnose:hover {
+  background: #059669;
+}
+
+.btn-diagnose:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* 삭제 버튼 */
+.btn-delete {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+.btn-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 정보 행 (등록일) */
+.table-info-row {
+  background: #f8f9fa;
+}
+
+.info-cell {
+  padding: 12px 24px;
+  font-size: 13px;
+  color: #6c757d;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* 빈 메시지 */
+.empty-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  font-size: 14px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* 페이지네이션 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-number {
+  padding: 10px 16px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
+  min-width: 44px;
+}
+
+.pagination-number:hover {
+  background: #f3f4f6;
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+
+.pagination-number.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: white;
+}
+
+/* 다크 모드 스타일 */
+body.dark-mode .patient-management {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+body.dark-mode .page-header {
+  background: #1f2937;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid #374151;
+}
+
+body.dark-mode .page-header h1 {
+  color: #f9fafb;
+}
+
+body.dark-mode .patients-table {
+  background: transparent;
+}
+
+body.dark-mode .table-header-row th {
+  background: #1f2937;
+  color: #d1d5db;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .table-data-row td {
+  background: #1f2937;
+}
+
+body.dark-mode .table-data-row:hover td {
+  background: #374151;
+}
+
+body.dark-mode .cell-name {
+  color: #f9fafb;
+}
+
+body.dark-mode .cell-age,
+body.dark-mode .cell-gender,
+body.dark-mode .cell-room,
+body.dark-mode .cell-chart {
+  color: #d1d5db;
+}
+
+body.dark-mode .status-completed {
+  background: #065f46;
+  color: #6ee7b7;
+}
+
+body.dark-mode .status-pending {
+  background: #78350f;
+  color: #fcd34d;
+}
+
+body.dark-mode .status-urgent {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+body.dark-mode .status-new {
+  background: #164e63;
+  color: #7dd3fc;
+}
+
+body.dark-mode .btn-diagnose {
+  background: #10b981;
+  color: white;
+}
+
+body.dark-mode .btn-diagnose:hover {
+  background: #059669;
+}
+
+body.dark-mode .btn-delete {
+  background: transparent;
+  border-color: #4b5563;
+  color: #9ca3af;
+}
+
+body.dark-mode .btn-delete:hover {
+  background: #374151;
+  border-color: #6b7280;
+  color: #d1d5db;
+}
+
+body.dark-mode .table-info-row {
+  background: #111827;
+}
+
+body.dark-mode .info-cell {
+  color: #9ca3af;
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .empty-message {
+  color: #9ca3af;
+}
+
+body.dark-mode .modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .modal-content {
+  background: #1f2937;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .modal-header {
+  border-bottom-color: #374151;
+}
+
+body.dark-mode .modal-header h2 {
+  color: #f9fafb;
+}
+
+body.dark-mode .modal-close {
+  color: #9ca3af;
+}
+
+body.dark-mode .modal-close:hover {
+  background: #374151;
+  color: #f9fafb;
+}
+
+body.dark-mode .modal-footer {
+  border-top-color: #374151;
+}
+
+body.dark-mode .form-input {
+  background: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+body.dark-mode .form-input:focus {
+  border-color: #6366f1;
+  background: #4b5563;
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  color: #1f2937;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.modal-close:hover {
+  background: #f3f4f6;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+  .management-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-section {
+    max-width: none;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .table-cell {
+    padding: 8px 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .table-cell:before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #374151;
+    margin-right: 8px;
+  }
+}
+
+/* Tailwind 다크 모드 지원 (.dark 클래스) */
+.dark .patient-management {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+.dark .page-header {
+  background: #1f2937;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid #374151;
+}
+
+.dark .page-header h1 {
+  color: #f9fafb;
+}
+
+.dark .patients-table {
+  background: transparent;
+}
+
+.dark .table-header-row th {
+  background: #1f2937;
+  color: #d1d5db;
+  border-bottom-color: #374151;
+}
+
+.dark .table-data-row td {
+  background: #1f2937;
+}
+
+.dark .table-data-row:hover td {
+  background: #374151;
+}
+
+.dark .cell-name {
+  color: #f9fafb;
+}
+
+.dark .cell-age,
+.dark .cell-gender,
+.dark .cell-room,
+.dark .cell-chart,
+.dark .cell-date {
+  color: #d1d5db;
+}
+
+.dark .status-completed {
+  background: #065f46;
+  color: #6ee7b7;
+}
+
+.dark .status-pending {
+  background: #78350f;
+  color: #fcd34d;
+}
+
+.dark .status-urgent {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+.dark .status-new {
+  background: #164e63;
+  color: #7dd3fc;
+}
+
+.dark .btn-diagnose {
+  background: #10b981;
+  color: white;
+}
+
+.dark .btn-diagnose:hover {
+  background: #059669;
+}
+
+.dark .btn-delete {
+  background: transparent;
+  border-color: #4b5563;
+  color: #9ca3af;
+}
+
+.dark .btn-delete:hover {
+  background: #374151;
+  border-color: #6b7280;
+  color: #d1d5db;
+}
+
+.dark .table-info-row {
+  background: #111827;
+}
+
+.dark .info-cell {
+  color: #9ca3af;
+  border-bottom-color: #374151;
+}
+
+.dark .empty-message {
+  color: #9ca3af;
+  background: #1f2937;
+}
+
+.dark .modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.dark .modal-content {
+  background: #1f2937;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.dark .modal-header {
+  border-bottom-color: #374151;
+}
+
+.dark .modal-header h2 {
+  color: #f9fafb;
+}
+
+.dark .modal-close {
+  color: #9ca3af;
+}
+
+.dark .modal-close:hover {
+  background: #374151;
+  color: #f9fafb;
+}
+
+.dark .modal-footer {
+  border-top-color: #374151;
+}
+
+.dark .form-input {
+  background: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+.dark .form-input:focus {
+  border-color: #6366f1;
+  background: #4b5563;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

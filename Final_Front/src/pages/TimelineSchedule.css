@@ -1,0 +1,251 @@
+/* 일정 관리 페이지 스타일 */
+.schedule-management-content {
+  padding: 0;
+  min-height: 100vh;
+  background-color: transparent;
+  margin: -24px;
+}
+
+.schedule-management-content .container {
+  max-width: 1400px;
+  margin: -32px auto;
+  padding: 0 16px;
+}
+
+/* 상단 관리 도구 */
+.management-tools {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 25px;
+  margin-bottom: 32px;
+  gap: 24px;
+  padding: 0 4px;
+  flex-wrap: wrap;
+}
+
+/* 필터 버튼 */
+.filter-btn {
+  padding: 8px 16px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+
+.filter-btn.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: white;
+}
+
+/* 그리드 레이아웃 */
+.schedule-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+.schedule-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: fit-content;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.schedule-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-self: start;
+}
+
+
+/* 캘린더 첫 번째 요소 상단 여백 제거 */
+.schedule-sidebar > div:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* 로딩 상태 */
+.loading-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 48px;
+  text-align: center;
+}
+
+.loading-spinner {
+  margin: 0 auto 16px;
+  width: 48px;
+  height: 48px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* 캘린더 플레이스홀더 */
+.calendar-placeholder {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 48px;
+  text-align: center;
+}
+
+.calendar-placeholder p {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* 타임라인 뷰 컨테이너 */
+.timeline-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* 미니 캘린더 스타일 개선 */
+.mini-calendar-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-top: 0 !important;
+  padding-top: 20px !important;
+}
+
+/* 다가오는 일정 스타일 개선 */
+.upcoming-events-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+}
+
+/* 타임라인 뷰 직접 스타일 - 모든 여백 제거 */
+.schedule-main > div {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+}
+
+.schedule-main > div > div {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* 캘린더 직접 스타일 - 첫 번째 div의 상단 여백 제거 */
+.schedule-sidebar > div:first-child {
+  margin-top: 0 !important;
+  padding-top: 16px !important; /* MiniCalendar의 기본 padding 유지 */
+}
+
+/* 인라인 스타일이 있는 요소들 강제 정렬 */
+.schedule-main [style*="backgroundColor"],
+.schedule-sidebar [style*="backgroundColor"] {
+  margin-top: 0 !important;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .schedule-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .management-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .schedule-management-content {
+    padding: 16px;
+  }
+
+  .schedule-management-content .container {
+    padding: 0 16px;
+  }
+}
+
+/* Tailwind 다크 모드 지원 (.dark 클래스) */
+.dark .schedule-management-content {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+.dark .filter-btn {
+  background: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+.dark .filter-btn:hover {
+  border-color: #6366f1;
+  color: #818cf8;
+}
+
+.dark .filter-btn.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: white;
+}
+
+.dark .loading-container {
+  background: #1f2937;
+}
+
+.dark .loading-text {
+  color: #d1d5db;
+}
+
+.dark .calendar-placeholder {
+  background: #1f2937;
+}
+
+.dark .calendar-placeholder p {
+  color: #9ca3af;
+}
+
+.dark .timeline-container {
+  background: #1f2937;
+}
+
+.dark .mini-calendar-wrapper {
+  background: #1f2937;
+}
+
+.dark .upcoming-events-wrapper {
+  background: #1f2937;
+}

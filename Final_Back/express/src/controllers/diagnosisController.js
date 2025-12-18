@@ -3,10 +3,26 @@ const fs = require('fs');
 const axios = require('axios');
 const FormData = require('form-data');
 const jwt = require('jsonwebtoken');
+const http = require('http');
 const Diagnosis = require('../models/Diagnosis');
 const Patient = require('../models/Patient');
 
-const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:8000';
+// localhost 대신 127.0.0.1 사용 (Windows IPv6 DNS 지연 문제 해결)
+const FASTAPI_URL = process.env.FASTAPI_URL || 'http://127.0.0.1:8000';
+
+// HTTP Agent 설정: TCP 최적화
+const httpAgent = new http.Agent({
+  keepAlive: false,
+  maxSockets: 1,
+  timeout: 60000,
+  // TCP_NODELAY: Nagle 알고리즘 비활성화로 지연 제거
+  scheduling: 'lifo'
+});
+
+// Socket 연결 시 TCP_NODELAY 설정
+httpAgent.on('socket', (socket) => {
+  socket.setNoDelay(true);
+});
 
 // 토큰에서 사용자 ID 추출 헬퍼 함수
 const getUserIdFromToken = (req) => {
@@ -122,10 +138,12 @@ exports.analyzeOnly = async (req, res) => {
     let aiAnalysis;
 
     try {
-      // FormData를 사용하여 파일을 직접 전송 (Buffer 사용)
+      const formDataStartTime = Date.now();
+      console.log('[1/4] FormData 생성 시작...');
+
+      // FormData를 사용하여 파일을 Stream으로 전송 (최적화)
       const formData = new FormData();
-      const imageBuffer = fs.readFileSync(imagePath);
-      formData.append('image', imageBuffer, {
+      formData.append('image', fs.createReadStream(imagePath), {
         filename: req.file.originalname || path.basename(imagePath),
         contentType: req.file.mimetype || 'image/png'
       });
@@ -133,24 +151,59 @@ exports.analyzeOnly = async (req, res) => {
       if (req.body.notes) {
         formData.append('notes', req.body.notes);
       }
-      
-      console.log('📤 FastAPI에 진단 요청 전송 (파일 직접 전송):');
+
+      console.log(`✓ FormData 생성 완료: ${(Date.now() - formDataStartTime) / 1000}초\n`);
+
+      console.log('[2/4] FastAPI 요청 준비...');
       console.log('   - URL:', `${FASTAPI_URL}/api/ai/diagnose`);
       console.log('   - patient_id:', patientId);
       console.log('   - image_file:', imagePath);
       console.log('   - filename:', req.file.originalname);
 
       const requestStartTime = Date.now();
+      console.log('[3/4] FastAPI 요청 전송 시작...\n');
+
+      let uploadEndTime = null;
       const fastApiResponse = await axios.post(
         `${FASTAPI_URL}/api/ai/diagnose`,
         formData,
         {
           timeout: 60000,
-          headers: formData.getHeaders()
+          headers: formData.getHeaders(),
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+          httpAgent: httpAgent,
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              if (percentCompleted % 25 === 0) {
+                console.log(`   업로드 진행: ${percentCompleted}%`);
+              }
+              if (percentCompleted === 100 && !uploadEndTime) {
+                uploadEndTime = Date.now();
+                console.log(`   ⏱️ 업로드 완료 시간: ${(uploadEndTime - requestStartTime) / 1000}초`);
+                console.log(`   ⏳ FastAPI 처리 대기 중...`);
+              }
+            }
+          }
         }
       );
       const requestEndTime = Date.now();
-      console.log(`✅ FastAPI 응답 완료: ${(requestEndTime - requestStartTime) / 1000}초`);
+      console.log(`\n✓ FastAPI 응답 수신 완료: ${(requestEndTime - requestStartTime) / 1000}초`);
+      if (uploadEndTime) {
+        console.log(`   📊 상세 타이밍:`);
+        console.log(`      - 업로드: ${(uploadEndTime - requestStartTime) / 1000}초`);
+        console.log(`      - FastAPI 처리 + 응답: ${(requestEndTime - uploadEndTime) / 1000}초`);
+      }
+
+      // 응답 크기 및 헤더 정보 출력
+      const responseSize = JSON.stringify(fastApiResponse.data).length;
+      const responseSizeKB = (responseSize / 1024).toFixed(2);
+      console.log(`   📦 응답 크기: ${responseSize} bytes (${responseSizeKB} KB)`);
+      console.log(`   📋 Content-Length: ${fastApiResponse.headers['content-length'] || 'N/A'}`);
+      console.log(`   🔧 Transfer-Encoding: ${fastApiResponse.headers['transfer-encoding'] || 'N/A'}`);
+
+      console.log('[4/4] 응답 데이터 처리 시작...\n');
 
       const data = fastApiResponse.data;
 
@@ -225,10 +278,12 @@ exports.createDiagnosis = async (req, res) => {
     let aiAnalysis;
 
     try {
-      // FormData를 사용하여 파일을 직접 전송 (Buffer 사용)
+      const formDataStartTime = Date.now();
+      console.log('[1/4] FormData 생성 시작...');
+
+      // FormData를 사용하여 파일을 Stream으로 전송 (최적화)
       const formData = new FormData();
-      const imageBuffer = fs.readFileSync(imagePath);
-      formData.append('image', imageBuffer, {
+      formData.append('image', fs.createReadStream(imagePath), {
         filename: req.file.originalname || path.basename(imagePath),
         contentType: req.file.mimetype || 'image/png'
       });
@@ -236,8 +291,10 @@ exports.createDiagnosis = async (req, res) => {
       if (req.body.notes) {
         formData.append('notes', req.body.notes);
       }
-      
-      console.log('📤 FastAPI에 진단 요청 전송 (파일 직접 전송):');
+
+      console.log(`✓ FormData 생성 완료: ${(Date.now() - formDataStartTime) / 1000}초\n`);
+
+      console.log('[2/4] FastAPI 요청 준비...');
       console.log('   - URL:', `${FASTAPI_URL}/api/ai/diagnose`);
       console.log('   - patient_id:', patientId);
       console.log('   - image_file:', imagePath);
@@ -245,16 +302,49 @@ exports.createDiagnosis = async (req, res) => {
 
       // FastAPI에 진단 요청
       const requestStartTime = Date.now();
+      console.log('[3/4] FastAPI 요청 전송 시작...\n');
+
+      let uploadEndTime = null;
       const fastApiResponse = await axios.post(
         `${FASTAPI_URL}/api/ai/diagnose`,
         formData,
         {
           timeout: 60000,
-          headers: formData.getHeaders()
+          headers: formData.getHeaders(),
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+          httpAgent: httpAgent,
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              if (percentCompleted % 25 === 0) {
+                console.log(`   업로드 진행: ${percentCompleted}%`);
+              }
+              if (percentCompleted === 100 && !uploadEndTime) {
+                uploadEndTime = Date.now();
+                console.log(`   ⏱️ 업로드 완료 시간: ${(uploadEndTime - requestStartTime) / 1000}초`);
+                console.log(`   ⏳ FastAPI 처리 대기 중...`);
+              }
+            }
+          }
         }
       );
       const requestEndTime = Date.now();
-      console.log(`✅ FastAPI 응답 완료: ${(requestEndTime - requestStartTime) / 1000}초`);
+      console.log(`\n✓ FastAPI 응답 수신 완료: ${(requestEndTime - requestStartTime) / 1000}초`);
+      if (uploadEndTime) {
+        console.log(`   📊 상세 타이밍:`);
+        console.log(`      - 업로드: ${(uploadEndTime - requestStartTime) / 1000}초`);
+        console.log(`      - FastAPI 처리 + 응답: ${(requestEndTime - uploadEndTime) / 1000}초`);
+      }
+
+      // 응답 크기 및 헤더 정보 출력
+      const responseSize = JSON.stringify(fastApiResponse.data).length;
+      const responseSizeKB = (responseSize / 1024).toFixed(2);
+      console.log(`   📦 응답 크기: ${responseSize} bytes (${responseSizeKB} KB)`);
+      console.log(`   📋 Content-Length: ${fastApiResponse.headers['content-length'] || 'N/A'}`);
+      console.log(`   🔧 Transfer-Encoding: ${fastApiResponse.headers['transfer-encoding'] || 'N/A'}`);
+
+      console.log('[4/4] 응답 데이터 처리 시작...\n');
 
       const data = fastApiResponse.data;
 

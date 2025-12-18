@@ -38,4 +38,5 @@ yarn-error.log*
 Final_Back/express/.env
 Final_Back/fastapi/.env
 
-NUL
+# model weights
+*.pth
